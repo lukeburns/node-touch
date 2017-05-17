@@ -83,6 +83,13 @@ function openThenF (f, options, cb) {
 function openThenFcb (options, cb) { return function (er, fd) {
   if (er) {
     if (fd && options.closeAfter) fs.close(fd, function () {})
+    if (er.code === 'EISDIR') {
+      var a = parseInt(options.atime / 1000, 10)
+        , m = parseInt(options.mtime / 1000, 10)
+      return fs.utimes(er.path, a, m, function (err) {
+        cb(err)
+      })
+    }
     return cb(er)
   }
   return ftouch(fd, options, cb)
